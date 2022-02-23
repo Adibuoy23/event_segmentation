@@ -1,8 +1,8 @@
-var jsPsychEventSegmentation = (function (jspsych) {
+var jsPsychVideoKeyboardResponse = (function (jspsych) {
   'use strict';
 
   const info = {
-      name: "event-segmentation-video-response",
+      name: "video-keyboard-response",
       parameters: {
           /** Array of the video file(s) to play. Video can be provided in multiple file formats for better cross-browser support. */
           stimulus: {
@@ -47,6 +47,24 @@ var jsPsychEventSegmentation = (function (jspsych) {
               pretty_name: "Controls",
               default: false,
           },
+          /** If true, the mask will appear on the video */
+          mask: {
+              type: jspsych.ParameterType.BOOL,
+              pretty_name: "mask",
+              default: true,
+          },
+          /** How long should the flicker duration be. */
+          flicker_duration: {
+              type: jspsych.ParameterType.INT,
+              pretty_name: "Flicker duration",
+              default: null,
+          },
+          /** How frequently should the flicker happen. */
+          flicker_frequency: {
+              type: jspsych.ParameterType.INT,
+              pretty_name: "Flicker frequency",
+              default: null,
+          },
           /** Time to start the clip. If null (default), video will start at the beginning of the file. */
           start: {
               type: jspsych.ParameterType.FLOAT,
@@ -89,14 +107,8 @@ var jsPsychEventSegmentation = (function (jspsych) {
               pretty_name: "Response allowed while playing",
               default: true,
           },
-          /** participant id */
-          participant_id: {
-              type: jspsych.ParameterType.INT,
-              pretty_name: "Participant ID",
-              default: undefined,
       },
-  }
-};
+  };
   /**
    * **video-keyboard-response**
    *
@@ -117,15 +129,9 @@ var jsPsychEventSegmentation = (function (jspsych) {
         of files. See https://www.jspsych.org/latest/plugins/video-keyboard-response/#parameters
       `);
           }
-          document.body.style.cursor = 'none';
-          var video_style = ["position:relative;top:0;left:0;",
-          "position:absolute;top:0;left:0;",
-          "position:absolute;top:0;left:0;"];
           // setup stimulus
-          var video_preload_blob = [];
-
-          var video_html = '<div style = "position:relative;top:0;left:0;">'
-            for(let stim=0; stim < trial.stimulus.length; stim++){video_html += '<video id='+'"video_'+stim.toString()+'"'+'style="'+video_style[stim]+'"';
+          var video_html = "<div>";
+            for(let stim=0; stim < trial.stimulus.length; stim++){video_html += '<video id='+'"video_'+stim.toString()+'"'+'style="position:absolute;left:25%;bottom:25%;right:25%;top:25%"';
             if (trial.width) {
                 video_html += ' width="' + trial.width + '"';
             }
@@ -146,8 +152,8 @@ var jsPsychEventSegmentation = (function (jspsych) {
                 video_html += ' style="visibility: hidden;"';
             }
             video_html += ">";
-            video_preload_blob.push(this.jsPsych.pluginAPI.getVideoBuffer(trial.stimulus[stim]));
-            if (!video_preload_blob[stim]) {
+            var video_preload_blob = this.jsPsych.pluginAPI.getVideoBuffer(trial.stimulus[stim]);
+            if (!video_preload_blob) {
                 var file_name = trial.stimulus[stim];
                 if (file_name.indexOf("?") > -1) {
                     file_name = file_name.substring(0, file_name.indexOf("?"));
@@ -161,24 +167,99 @@ var jsPsychEventSegmentation = (function (jspsych) {
             }
             video_html += "</video>";}
 
-          video_html += '<div id="feedback" style="position:absolute;color:white;text-align:center;top:50%;left:50%;right:0">'+""+'</div>';
+          if(trial.mask){
+            video_html += '<img src="./mask.png" id="mask" style="position:absolute;left:25%;bottom:25%;right:25%;top:25%"';
+            if (trial.width) {
+                video_html += ' width=' + trial.width + ';';
+            }
+            if (trial.height) {
+                video_html += ' height=' + trial.height + ';';
+            }
+            video_html += ' >';
+          }
           video_html += "</div>";
           // add prompt if there is one
           if (trial.prompt !== null) {
-              video_html += '<div id="prompt" style="position:relative;text-align:center;top:0;left:0;right:0">'+trial.prompt+'</div>';
+              video_html += trial.prompt;
           }
           display_element.innerHTML = video_html;
 
+          // Define the flickering scenario
+          var timeoutID;
+          var flickerTimeOut;
+          if (timeoutID){
+            clearTimeout(timeoutID);
+            timeoutID = 'null';
+          }
+          function show_flicker(mask){
+            mask.style.visibility='visible';
+            var flicker_duration = trial.flicker_duration;
+            flickerTimeOut = setTimeout(()=>{mask.style.visibility='hidden';},flicker_duration);
+          }
+          var counter = 0;
+          var magnitude_jump = [0, 500, 1000];
+          var direction = 'forward';
+          function change_video(magnitude_jump){
+            if (counter % 4 ==3){
+              counter += 1;
+              if (direction == 'forward'){
+                var jump = magnitude_jump.pop();
+                console.log(jump);
+                direction = 'reverse';
+                if (jump == 500){
+                  console.log("Forward:500");
+                  video_1.style.opacity = 1;
+                  video_2.style.opacity = 0;
+                  video_0.style.opacity = 0;
+                }
+                else if(jump == 1000){
+                  console.log("Forward:1000");
+                  video_2.style.opacity = 1;
+                  video_0.style.opacity = 0;
+                  video_1.style.opacity = 0;
+                }
+              }
+              else{ // jump back to the original video
+                console.log("Reverse");
+                video_0.style.opacity = 1;
+                video_1.style.opacity = 0;
+                video_2.style.opacity = 0;
+                direction = 'forward';
+              }
 
-          // Create the change time point and response time variables
-          var rt;
+
+            }
+            else{
+              counter += 1;
+            }
+          }
+
+          function flicker(mask){
+            var flicker_frequency = trial.flicker_frequency;
+            change_video(magnitude_jump);
+            timeoutID = setTimeout(()=>{flicker(mask); show_flicker(mask)},flicker_frequency);
+          }
+          var mask = document.querySelector('#mask');
+          mask.style.visibility = 'hidden';
 
           var video_0 = document.querySelector('#video_0');
+          var video_1 = document.querySelector('#video_1');
+          var video_2 = document.querySelector('#video_2');
+
+          video_1.style.opacity = 0;
+          video_2.style.opacity = 0;
+
+          if (trial.flicker_duration != 'null' && trial.flicker_frequency != 'null'){
+            flicker(mask);
+          }
 
           // Define the end of trial scenario
           var onended = () => {
               if (trial.trial_ends_after_video) {
                   end_trial();
+                  clearTimeout(timeoutID);
+                  clearTimeout(flickerTimeOut);
+                  timeoutID = 'null';
               }
               if (trial.response_allowed_while_playing == false && !trial.trial_ends_after_video) {
                   // start keyboard listener
@@ -193,11 +274,10 @@ var jsPsychEventSegmentation = (function (jspsych) {
           };
 
           var video_element = []
-          var stim_in_trial = trial.stimulus[0].replace(/^.*[\\\/]/, '');
           for (let stim=0; stim < trial.stimulus.length; stim++){
             video_element.push(display_element.querySelector('#video_'+stim.toString()));
             if (video_preload_blob) {
-                video_element[stim].src = video_preload_blob[stim];
+                video_element[stim].src = video_preload_blob;
             }
             video_element[stim].playbackRate = trial.rate;
             video_element[stim].onended = onended
@@ -245,6 +325,9 @@ var jsPsychEventSegmentation = (function (jspsych) {
                             // can fire in quick succession
                             stopped = true;
                             end_trial();
+                            clearTimeout(timeoutID);
+                            clearTimeout(flickerTimeOut);
+                            timeoutID = 'null'
                         }
                     }
                 });
@@ -254,10 +337,8 @@ var jsPsychEventSegmentation = (function (jspsych) {
 
           // store response
           var response = {
-              participant_id: participant_id,
               rt: [],
               key: [],
-              stim_in_trial: [],
           };
           // function to end trial when it is time
           const end_trial = () => {
@@ -276,18 +357,16 @@ var jsPsychEventSegmentation = (function (jspsych) {
 
               // gather the data to store for the trial
               var trial_data = {
-                  participant_id: JSON.stringify(response.participant_id),
                   rt: JSON.stringify(response.rt),
-                  key: JSON.stringify(response.key)
-                  stimInTrial : JSON.stringify(response.stim_in_trial),
-
+                  stimulus: trial.stimulus,
+                  response: JSON.stringify(response.key),
               };
               // clear the display
               display_element.innerHTML = "";
               // move on to the next trial
               this.jsPsych.finishTrial(trial_data);
           };
-
+          // function to handle responses by the subject
           var after_response = (info) => {
               // after a valid response, the stimulus will have the CSS class 'responded'
               // which can be used to provide visual feedback that a response was recorded
@@ -295,17 +374,18 @@ var jsPsychEventSegmentation = (function (jspsych) {
                 display_element.querySelector('#video_'+stim.toString()).className +=
                     " responded";
               }
+
               // record all the responses
               console.log(info)
               response.rt.push(info.rt);
               response.key.push(info.key);
-              response.stim_in_trial.push(stim_in_trial);
               if (trial.response_ends_trial) {
                   end_trial();
               }
           };
           // start the response listener
           if (trial.choices != "NO_KEYS" && trial.response_allowed_while_playing) {
+            console.log(info)
               this.jsPsych.pluginAPI.getKeyboardResponse({
                   callback_function: after_response,
                   valid_responses: trial.choices,
