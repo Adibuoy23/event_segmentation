@@ -19,9 +19,9 @@ var jsPsychEventSegmentation = (function (jspsych) {
           },
           /** Any content here will be displayed below the stimulus. */
           prompt: {
-              type: jspsych.ParameterType.HTML_STRING,
+              type: jspsych.ParameterType.BOOL,
               pretty_name: "Prompt",
-              default: null,
+              default: true,
           },
           /** The width of the video in pixels. */
           width: {
@@ -163,9 +163,104 @@ var jsPsychEventSegmentation = (function (jspsych) {
 
           video_html += '<div id="feedback" style="position:absolute;color:white;text-align:center;top:50%;left:50%;right:0">'+""+'</div>';
           video_html += "</div>";
+
+          video_html += '<div style = "position:relative;top:0;left:0;"><div id = "prompt" style="position:relative;color:black;text-align:center;top:0;left:0;right:0"';
+          video_html += ' width="' + trial.width + '"';
+          video_html += ' height="100"';
+          video_html += '></div></div>';
+
+          function drawnode(x, y) {
+
+             var ele = ""
+             var style = "color:black;";
+             style += "position:absolute;";
+             style += "z-index:100;"
+             ele += "<div class='relNode' style=" + style + ">";
+             ele += "<span> |</span>"
+             ele += "<div>"
+
+             $('#prompt').show();
+             var node = $(ele).appendTo('#prompt');
+             var width = node.width();
+             var height = node.height();
+
+             var centerX = width / 2;
+             var centerY = height / 2;
+
+             var startX = x - centerX;
+             var startY = y - centerY;
+
+             node.css("left", startX).css("top", startY);
+
+         }
+
+         function drawline(ax, ay, bx, by) {
+             console.log('ax: ' + ax);
+             console.log('ay: ' + ay);
+             console.log('bx: ' + bx);
+             console.log('by: ' + by);
+
+
+             if (ax > bx) {
+                 bx = ax + bx;
+                 ax = bx - ax;
+                 bx = bx - ax;
+                 by = ay + by;
+                 ay = by - ay;
+                 by = by - ay;
+             }
+
+
+             console.log('ax: ' + ax);
+             console.log('ay: ' + ay);
+             console.log('bx: ' + bx);
+             console.log('by: ' + by);
+
+             var angle = Math.atan((ay - by) / (bx - ax));
+             console.log('angle: ' + angle);
+
+             angle = (angle * 180 / Math.PI);
+             console.log('angle: ' + angle);
+             angle = -angle;
+             console.log('angle: ' + angle);
+
+             var length = Math.sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
+             console.log('length: ' + length);
+
+             var style = ""
+             style += "left:" + (ax) + "px;"
+             style += "top:" + (ay) + "px;"
+             style += "width:" + length + "px;"
+             style += "height:1px;"
+             style += "background-color:black;"
+             style += "position:absolute;"
+             style += "transform:rotate(" + angle + "deg);"
+             style += "-ms-transform:rotate(" + angle + "deg);"
+             style += "transform-origin:0% 0%;"
+             style += "-moz-transform:rotate(" + angle + "deg);"
+             style += "-moz-transform-origin:0% 0%;"
+             style += "-webkit-transform:rotate(" + angle + "deg);"
+             style += "-webkit-transform-origin:0% 0%;"
+             style += "-o-transform:rotate(" + angle + "deg);"
+             style += "-o-transform-origin:0% 0%;"
+             style += "-webkit-box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, .1);"
+             style += "box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, .1);"
+             style += "z-index:99;"
+             $("<div style='" + style + "'></div>").appendTo('#prompt');
+         }
           // add prompt if there is one
-          if (trial.prompt !== null) {
-              video_html += '<div id="prompt" style="position:relative;text-align:center;top:0;left:0;right:0">'+trial.prompt+'</div>';
+          if (trial.prompt==true) {
+
+              var prompt_canvas = document.querySelector('#prompt');
+              console.log(prompt_canvas);
+              var x1 = 0;
+              var x2 = 1000;
+              var y = 50;
+
+              // drawnode(x1, y);
+              // drawnode(x2, y);
+              drawline(x1, y, x2, y);
+
           }
           display_element.innerHTML = video_html;
 
@@ -278,7 +373,7 @@ var jsPsychEventSegmentation = (function (jspsych) {
               var trial_data = {
                   participant_id: JSON.stringify(response.participant_id),
                   rt: JSON.stringify(response.rt),
-                  key: JSON.stringify(response.key)
+                  key: JSON.stringify(response.key),
                   stimInTrial : JSON.stringify(response.stim_in_trial),
 
               };
@@ -300,6 +395,9 @@ var jsPsychEventSegmentation = (function (jspsych) {
               response.rt.push(info.rt);
               response.key.push(info.key);
               response.stim_in_trial.push(stim_in_trial);
+              var temp = x2 * (info.rt/60000);
+              console.log(temp);
+              drawnode(temp, y);
               if (trial.response_ends_trial) {
                   end_trial();
               }

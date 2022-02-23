@@ -43,7 +43,6 @@ var jsPsych = initJsPsych({
   var videos = [
     stimuli.map(a => a.video_one),
   ]
-  console.log(videos)
 
   var fullscreen_start = {
     type: jsPsychFullscreen,
@@ -118,7 +117,7 @@ var jsPsych = initJsPsych({
     stimulus:[jsPsych.timelineVariable('video_one')],
     choices: ' ',
     trial_ends_after_video:true,
-    prompt: " ",
+    prompt: true,
     response_ends_trial:false,
     participant_id: participant_id,
   };
