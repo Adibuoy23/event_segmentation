@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="./jspsych/dist/jspsych.js"></script>
+  <script src="./plugin-html-button-response.js"></script>
+  <script src="./jspsych/dist/plugin-html-keyboard-response.js"></script>
+  <script src="./jspsych/dist/plugin-video-keyboard-response.js"></script>
+  <script src="./plugin-cb-video.js"></script>
+  <script src="./jspsych/dist/plugin-preload.js"></script>
+  <script src="./jspsych/dist/plugin-fullscreen.js"></script>
+  <script src="./plugin-likert-survey.js"></script>
+  <script src="./plugin-text-survey.js"></script>
+  <script src="./input.js"></script>
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <link rel="stylesheet" href="./jspsych/dist/jspsych.css">
+</head>
+
+<body>
+</body>
+
+<script>
+var jsPsych = initJsPsych({
+    on_finish: function(data){
+    window.location.assign("https://ucdavis.sona-systems.com/webstudy_credit.aspx?experiment_id=2814&credit_token=ec0ffa50d82946bbb1b0f84d7f8db001&survey_code="+sona_id);
+    document.body.style.cursor = 'default';
+  }
+  });
+
+  /* create timeline */
+  var timeline = [];
+  let sona_id = jsPsych.data.urlVariables()['sona_id']
+  var participant_id;
+  if (sona_id){
+    participant_id = sona_id
+  } else{
+    participant_id = 0000
+  }
+
+  var test_stimuli = stimuli.slice(0,1);
+  stimuli = stimuli.slice(1,stimuli.length);
+
+ var test_videos = [
+   test_stimuli.map(a => a.video_one),
+   test_stimuli.map(a => a.video_two),
+   test_stimuli.map(a => a.video_three)
+ ]
+
+  var videos = [
+    stimuli.map(a => a.video_one),
+    stimuli.map(a => a.video_two),
+    stimuli.map(a => a.video_three)
+  ]
+
+  /* preload images */
+  var preload = {
+    type: jsPsychPreload,
+    video: test_videos,
+    data:{participant_id:participant_id},
+  };
+  timeline.push(preload);
+
+  var fullscreen_start = {
+    type: jsPsychFullscreen,
+    fullscreen_mode: true,
+    data:{participant_id:participant_id},
+  };
+  timeline.push(fullscreen_start);
+
+
+  var start = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: '<h3>Welcome to the experiment!</h3><p>Your goal in this experiment is to <b>detect temporal shifts in video.</b></p>',
+    choices: ['Next'],
+    data:{participant_id:participant_id},
+  };
+
+  timeline.push(start);
+
+  var introduction = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p>You will be watching movie clips without audio (1 min long) from the movie 1917." +
+               "<br> "+
+               "<br>1917 was released in 2019 - This movie is famous for its single long shot cinematography with no scene cuts." +
+               "<br> "+
+               "<br>This means that visually the movie watching experience should be smooth and continuous without any disruptions." +
+               "<br> "+
+               "<br>However, for the purpose of this study, we have added some disruptions to the movie clips you are going to be watching today." +
+               "<br> "+
+               "<br>These disruptions are abrupt flickers in the video. You will find the <strong>screen to flicker consistently at repeated intervals</strong> when watching these clips. </p>",
+    choices: ["Next"],
+    data:{participant_id:participant_id},
+  };
+  timeline.push(introduction);
+
+  var introduction2 = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p>Occasionally during these screen flickers, the video jumps forward / backward in time" +
+               "<br> "+
+               "<br>Your job is to detect the video jumps in time and report them" +
+               "<br> "+
+               "<br>You will report them by pressing the <strong>SPACE BAR</strong> immediately as soon as you noticed the jumps" +
+               "<br> "+
+               "<br>Try to be as quick as possible in reporting these jumps. </p>",
+    choices: ["Next"],
+    data:{participant_id:participant_id},
+  };
+  timeline.push(introduction2);
+
+
+  var introduction4 = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p> This experiment should take not more than 30 minutes of your time."+
+    "<br>" +
+    "<br> We have prepared demo trial to show you what we mean."+
+    "<br>"+
+    "<br> The demo trial will have feedback so that you can get a good understanding of the experiment.</p>",
+    choices: ["Okay, now show me a demo trial"],
+    data:{participant_id:participant_id},
+  };
+  timeline.push(introduction4);
+
+  var fixation = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: '<div class="container-debug">' +
+              '<div style="font-size:60px;color:black;text-align:center;vertical-align:middle;line-height:375px;">+</div>' +
+              '</div>',
+    choices: 'NO_KEYS',
+    trial_duration: 1000,
+    data:{participant_id:participant_id},
+    on_start: function(trial) {
+      document.body.style.cursor = 'none';
+      }
+  }
+
+  var demo_trial = {
+    type: jsPsychCbVideo,
+    response_allowed_while_playing:true,
+    width:1000,
+    stimulus:[test_stimuli[0].video_one, test_stimuli[0].video_two, test_stimuli[0].video_three],
+    flicker_duration: 80,
+    flicker_frequency: 2000,
+    choices: ' ',
+    trial_ends_after_video:true,
+    prompt: "Press SPACEBAR when you see the video jump in time.",
+    response_ends_trial:false,
+    show_feedback:true,
+    magnitude: test_stimuli[0].magnitude,
+    timepoints: test_stimuli[0].timepoints,
+    practice: true,
+    participant_id: participant_id,
+  };
+
+  timeline.push({
+    timeline: [fixation, demo_trial],
+    timeline_variables: test_stimuli
+              });
+
+  var revisit_demo = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p> Do you want to try the demo again to understand the experiment?</p>",
+    choices: ["Yes", "No, I think I got it"],
+    data:{participant_id:participant_id},
+  };
+
+  var if_revisit_demo = {
+    timeline : [fixation, demo_trial, revisit_demo],
+    data:{participant_id:participant_id},
+    conditional_function: function(){
+      //get the data from the previous trial
+      // and check which button was pressed
+      console.log(jsPsych.data.get().last(1).values()[0]);
+      var data = jsPsych.data.get().last(1).values()[0];
+      if (data.response ==0){
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+  timeline.push({
+    timeline: [revisit_demo, if_revisit_demo, if_revisit_demo],
+  });
+
+
+  /* preload images */
+  var preload2 = {
+    type: jsPsychPreload,
+    video: videos,
+    message: "Preloading the rest of the experiment. This might take a while.",
+    data:{participant_id:participant_id},
+  };
+  timeline.push(preload2);
+
+  var no_feedback_notification = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p> Unlike the demo the rest of the experiment will not have any feedback </p>",
+    choices: ["Understood"],
+    data:{participant_id:participant_id},
+  };
+  timeline.push(no_feedback_notification);
+
+
+  var trial = {
+    type: jsPsychCbVideo,
+    response_allowed_while_playing:true,
+    width:1000,
+    stimulus:[jsPsych.timelineVariable('video_one'), jsPsych.timelineVariable('video_two'), jsPsych.timelineVariable('video_three')],
+    flicker_duration: 150,
+    flicker_frequency: 2000,
+    choices: ' ',
+    trial_ends_after_video:true,
+    prompt: " ",
+    response_ends_trial:false,
+    show_feedback:false,
+    magnitude: jsPsych.timelineVariable('magnitude'),
+    timepoints: jsPsych.timelineVariable('timepoints'),
+    practice: false,
+    participant_id: participant_id,
+  };
+
+  timeline.push({
+    timeline: [fixation, trial],
+    timeline_variables: stimuli
+              });
+
+
+  var end_note = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p>THE END.<br>" +
+    "Thank you for participating. The experiment is done. <strong> Do not close yet. </strong>"+
+    "<br>"+
+    "<br> Please answer a few questions before exiting. Following this, you will be <strong> redirected to the SONA page </strong> to get your credits."+
+    "<br>"+
+    "<br> If you have any questions, please reach out to saupadhy@ucdavis.edu.</p>",
+    choices: ["Got it"],
+    data:{participant_id:participant_id},
+  }
+  timeline.push(end_note);
+
+  var scale = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
+
+  var likert_trial = {
+      type: jsPsychLikertSurvey,
+      questions: [
+        {prompt: "There were no issues with the video loading", name: 'Video loading', labels: scale, required: true},
+        {prompt: "The instructions and demonstration were clear to understand the experiment", name: 'Instructions', labels: scale, required: true},
+        {prompt: "Overall, the video jumps were easy to notice", name: 'Video jumps', labels: scale, required: true}
+      ],
+      data:{participant_id:participant_id},
+  };
+
+  timeline.push(likert_trial);
+
+  var survey_page = {
+    type: jsPsychTextSurvey,
+    questions: [
+      {prompt: 'Other comments', placeholder: 'Type N/A if none', rows:10, columns: 50}
+    ],
+    data:{participant_id:participant_id},
+  };
+
+  timeline.push(survey_page);
+
+  var fullscreen_trial_exit = {
+    type: jsPsychFullscreen,
+    fullscreen_mode: false,
+    data:{participant_id:participant_id},
+  };
+
+  timeline.push(fullscreen_trial_exit);
+
+  if (typeof jsPsych !== "undefined") {
+    jsPsych.run(timeline);
+  } else {
+    document.body.innerHTML = '<div style="text-align:center; margin-top:50%; transform:translate(0,-50%);">You must be online to view the demo.</div>';
+  }
+</script>
+
+</html>
