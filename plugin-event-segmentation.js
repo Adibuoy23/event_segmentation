@@ -246,7 +246,11 @@ var jsPsychEventSegmentation = (function (jspsych) {
              style += "-webkit-box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, .1);"
              style += "box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, .1);"
              style += "z-index:99;"
-             $("<div style='" + style + "'></div>").appendTo('#prompt');
+
+             var line = "<div id = 'line' style='" + style + "'></div>"
+             console.log(line);
+             // setTimeout(()=>{$(line).appendTo('#prompt');},250);
+             setTimeout(()=>{$(line).appendTo('#prompt');},50);
          }
           // add prompt if there is one
           if (trial.prompt==true) {
@@ -254,12 +258,13 @@ var jsPsychEventSegmentation = (function (jspsych) {
               var prompt_canvas = document.querySelector('#prompt');
               console.log(prompt_canvas);
               var x1 = 0;
-              var x2 = 1000;
+              var x2 = trial.width;
               var y = 50;
 
               // drawnode(x1, y);
               // drawnode(x2, y);
               drawline(x1, y, x2, y);
+
 
           }
           display_element.innerHTML = video_html;
