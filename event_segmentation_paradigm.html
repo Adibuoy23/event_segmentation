@@ -104,7 +104,9 @@ var jsPsych = initJsPsych({
 
   var introduction4 = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: "<p> Remember there is no correct answer! You should just mark these videos into smallest units that seem natural and meaningful to you."+
+    stimulus: "<p> Remember there is <strong> no correct </strong> answer!"+
+    "<br>" +
+    "<br> You should just mark these videos into smallest units that seem natural and meaningful to you."+
     "<br>" +
     "<br> Let's do a couple of demo trials to get you acquainted with the paradigm.</p>",
     choices: ["Okay, let's get started!"],
@@ -128,18 +130,31 @@ var jsPsych = initJsPsych({
 
   timeline.push({
     timeline: [demo_trial1],
-    timeline_variables: test_stimuli
+    timeline_variables: test_stimuli[0]
               });
 
   var demo_explanation = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: "<p> Hopefully, you were able to identify small meaningful units in this video"+
+    stimulus: "<p> Hopefully, you were able to identify meaningful units in this video"+
     "<br> "+
-    "<br> The actor in this video sprayed the kitchen counter top, wiped it clean using a cloth, folded the cloth and put it back"+
+    "<br> The actor in this video did the following:"+
+    "<br>" +
+    "<br> Walked to the kitchen counter"+
+    "<br>" +
+    "<br> Sprayed the kitchen surface"+
+    "<br>" +
+    "<br> Wiped the surface with a cloth"+
+    "<br>" +
+    "<br> Dusted and folded the cloth"+
+    "<br>" +
+    "<br> Cleaned their hands"+
+    "<br>" +
+    "<br> Walked away from the scene"+
+    "<br>" +
+    "<br>" +
+    "<br> These are all examples of small meaningful units in the video you just watched."+
     "<br> "+
-    "These are all examples of small meaningful units in the video you just watched."+
-    "<br> "+
-    "Let's try one more demo. This time let's identify small meaningful units from one of the clips from the 1917 movie. </p>",
+    "<br> Let's try one more demo. This time let's identify small meaningful units from one of the clips from the 1917 movie. </p>",
     choices: ["Continue"],
     data:{participant_id:participant_id},
   };
@@ -161,18 +176,18 @@ var jsPsych = initJsPsych({
 
   timeline.push({
     timeline: [demo_trial2],
-    timeline_variables: test_stimuli
+    timeline_variables: test_stimuli[1]
               });
 
   var demo_explanation2 = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: "<p> Hopefully this video should help you understand what we mean by small meaningful units"+
+    stimulus: "<p> Hopefully these demos should help you understand what we mean by small meaningful units"+
     "<br> "+
     "<br> Remember, there is no correct answer for what a meaninful unit is!"+
     "<br> "+
-    "We just want to know if there are certain segments of the video that you think are natural and meaningful ."+
+    "<br> We just want to know if there are certain segments of the video that you think are natural and meaningful ."+
     "<br> "+
-    "Get ready now! Let's watch some more clips from the 1917 movie. </p>",
+    "<br> Get ready now! Let's watch some more clips from the 1917 movie. </p>",
     choices: ["Let's get started"],
     data:{participant_id:participant_id},
   };
@@ -229,7 +244,7 @@ var jsPsych = initJsPsych({
       type: jsPsychLikertSurvey,
       questions: [
         {prompt: "There were no issues with the video loading", name: 'Video loading', labels: scale, required: true},
-        {prompt: "The instructionswere clear to understand the experiment", name: 'Instructions', labels: scale, required: true},
+        {prompt: "The instructions were clear to understand the experiment", name: 'Instructions', labels: scale, required: true},
       ],
       data:{participant_id:participant_id},
   };

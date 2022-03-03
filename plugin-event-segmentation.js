@@ -412,7 +412,7 @@ var jsPsychEventSegmentation = (function (jspsych) {
               response.rt.push(info.rt);
               response.key.push(info.key);
               response.stim_in_trial.push(stim_in_trial);
-              var temp = x2 * (info.rt/60000);
+              var temp = x2 * (info.rt/(document.getElementById("video_0").duration * 1000));
               console.log(temp);
               drawnode(temp, y);
               if (trial.response_ends_trial) {

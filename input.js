@@ -1,7 +1,7 @@
-var src = 'https://adibuoy23.github.io/event_segmentation/stimuli_with_audio/';
+var src = 'https://adibuoy23.github.io/event_segmentation/stimuli/';
 var stimuli = [
 {
-video_one: src+"exampleA.mp4",
+video_one: src+"ExampleA.mp4",
 },
 {
 video_one: src+"0msec_clip_41_1917.mp4",
