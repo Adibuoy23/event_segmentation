@@ -47,6 +47,12 @@ var jsPsychEventSegmentation = (function (jspsych) {
               pretty_name: "Controls",
               default: false,
           },
+          /** If true, the subject will be able to pause the video or move the playback to any point in the video. */
+          mute: {
+              type: jspsych.ParameterType.BOOL,
+              pretty_name: "Mute",
+              default: false,
+          },
           /** Time to start the clip. If null (default), video will start at the beginning of the file. */
           start: {
               type: jspsych.ParameterType.FLOAT,
@@ -300,6 +306,12 @@ var jsPsychEventSegmentation = (function (jspsych) {
                 video_element[stim].src = video_preload_blob[stim];
             }
             video_element[stim].playbackRate = trial.rate;
+            if (trial.mute){
+              video_element[stim].muted = true;
+            }
+            else{
+              video_element[stim].muted = false;
+            }
             video_element[stim].onended = onended
             // if video start time is specified, hide the video and set the starting time
             // before showing and playing, so that the video doesn't automatically show the first frame
