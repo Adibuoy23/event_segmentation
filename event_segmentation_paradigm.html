@@ -38,11 +38,25 @@ var jsPsych = initJsPsych({
     participant_id = 0000
   }
 
-  stimuli = stimuli.slice(0,stimuli.length);
+  var test_stimuli = stimuli.slice(0,2);
+  stimuli = stimuli.slice(2,stimuli.length);
+
+  var test_videos = [
+    test_stimuli.map(a => a.video_one),
+  ]
 
   var videos = [
     stimuli.map(a => a.video_one),
   ]
+
+  /* preload images */
+  var preload_demo = {
+    type: jsPsychPreload,
+    video: test_videos,
+    data:{participant_id:participant_id},
+  };
+  timeline.push(preload_demo);
+
 
   var fullscreen_start = {
     type: jsPsychFullscreen,
@@ -63,7 +77,9 @@ var jsPsych = initJsPsych({
 
   var introduction = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: "<p>You will be watching the first 40 minutes of the movie 1917." +
+    stimulus: "<p> This experiment should take about 20-25 minutes of your time. You will receive 0.5 credits upon completion."+
+               "<br> "+
+               "<br> You will be watching some clips from the movie 1917 <strong>without any audio </strong>." +
                "<br> "+
                "<br> 1917 was released in 2019 - This movie is famous for its single long shot cinematography with no scene cuts." +
                "<br> "+
@@ -75,15 +91,11 @@ var jsPsych = initJsPsych({
 
   var introduction2 = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: "<p>Your job is to segment the video into small meaningful units" +
+    stimulus: "<p>Your job is to segment the video into <strong>small meaningful units </strong>" +
                "<br> "+
                "<br> A meaningful unit is usually something that stands out by itself - and doesn't require the rest of the video to understand"+
                "<br> "+
-               "<br> Few relevant examples from this movie are: <strong> walking, salute, colliding, hand gestures, jumping </strong> to name a few"+
-               "<br> "+
-               "<br> Tap <strong>SPACE BAR</strong> when in your judgment, one unit ends, and the other begins." +
-               "<br> "+
-               "<br> Basically you will be marking off these videos into <strong> smallest meaningful units </strong> that seem natural and meaningful to you. </p>",
+               "<br> Tap <strong>SPACE BAR</strong> when in your judgment, one unit ends, and the other begins.</p>",
     choices: ["Next"],
     data:{participant_id:participant_id},
   };
@@ -92,14 +104,95 @@ var jsPsych = initJsPsych({
 
   var introduction4 = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: "<p> This experiment should take about 45-50 minutes of your time."+
+    stimulus: "<p> Remember there is <strong> no correct </strong> answer!"+
     "<br>" +
-    "<br> You will receive 1.5 credits upon completion. </p>",
+    "<br> You should just mark these videos into smallest units that seem natural and meaningful to you."+
+    "<br>" +
+    "<br> Let's do a couple of demo trials to get you acquainted with the paradigm.</p>",
     choices: ["Okay, let's get started!"],
     data:{participant_id:participant_id},
   };
   timeline.push(introduction4);
 
+
+  var demo_trial1 = {
+    type: jsPsychEventSegmentation,
+    response_allowed_while_playing:true,
+    width:1000,
+    stimulus:[test_stimuli[0].video_one],
+    choices: ' ',
+    trial_ends_after_video:true,
+    prompt: true,
+    mute:true,
+    response_ends_trial:false,
+    participant_id: participant_id,
+  };
+
+  timeline.push({
+    timeline: [demo_trial1],
+    timeline_variables: test_stimuli[0]
+              });
+
+  var demo_explanation = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p> Hopefully, you were able to identify meaningful units in this video"+
+    "<br> "+
+    "<br> The actor in this video did the following:"+
+    "<br>" +
+    "<br> Walked to the kitchen counter"+
+    "<br>" +
+    "<br> Sprayed the kitchen surface"+
+    "<br>" +
+    "<br> Wiped the surface with a cloth"+
+    "<br>" +
+    "<br> Dusted and folded the cloth"+
+    "<br>" +
+    "<br> Cleaned their hands"+
+    "<br>" +
+    "<br> Walked away from the scene"+
+    "<br>" +
+    "<br>" +
+    "<br> These are all examples of small meaningful units in the video you just watched."+
+    "<br> "+
+    "<br> Let's try one more demo. This time let's identify small meaningful units from one of the clips from the 1917 movie. </p>",
+    choices: ["Continue"],
+    data:{participant_id:participant_id},
+  };
+
+  timeline.push(demo_explanation);
+
+  var demo_trial2 = {
+    type: jsPsychEventSegmentation,
+    response_allowed_while_playing:true,
+    width:1000,
+    stimulus:[test_stimuli[1].video_one],
+    choices: ' ',
+    trial_ends_after_video:true,
+    prompt: true,
+    mute:true,
+    response_ends_trial:false,
+    participant_id: participant_id,
+  };
+
+  timeline.push({
+    timeline: [demo_trial2],
+    timeline_variables: test_stimuli[1]
+              });
+
+  var demo_explanation2 = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p> Hopefully these demos should help you understand what we mean by small meaningful units"+
+    "<br> "+
+    "<br> Remember, there is no correct answer for what a meaninful unit is!"+
+    "<br> "+
+    "<br> We just want to know if there are certain segments of the video that you think are natural and meaningful ."+
+    "<br> "+
+    "<br> Get ready now! Let's watch some more clips from the 1917 movie. </p>",
+    choices: ["Let's get started"],
+    data:{participant_id:participant_id},
+  };
+
+  timeline.push(demo_explanation2);
 
   /* preload images */
   var preload = {
@@ -120,10 +213,11 @@ var jsPsych = initJsPsych({
     choices: ' ',
     trial_ends_after_video:true,
     prompt: true,
-    mute:false,
+    mute:true,
     response_ends_trial:false,
     participant_id: participant_id,
   };
+
 
   timeline.push({
     timeline: [trial],
@@ -150,7 +244,7 @@ var jsPsych = initJsPsych({
       type: jsPsychLikertSurvey,
       questions: [
         {prompt: "There were no issues with the video loading", name: 'Video loading', labels: scale, required: true},
-        {prompt: "The instructionswere clear to understand the experiment", name: 'Instructions', labels: scale, required: true},
+        {prompt: "The instructions were clear to understand the experiment", name: 'Instructions', labels: scale, required: true},
       ],
       data:{participant_id:participant_id},
   };
