@@ -47,6 +47,12 @@ var jsPsychEventSegmentation = (function (jspsych) {
               pretty_name: "Controls",
               default: false,
           },
+          /** If true, the subject will be able to pause the video or move the playback to any point in the video. */
+          mute: {
+              type: jspsych.ParameterType.BOOL,
+              pretty_name: "Mute",
+              default: false,
+          },
           /** Time to start the clip. If null (default), video will start at the beginning of the file. */
           start: {
               type: jspsych.ParameterType.FLOAT,
@@ -231,8 +237,8 @@ var jsPsychEventSegmentation = (function (jspsych) {
              style += "left:" + (ax) + "px;"
              style += "top:" + (ay) + "px;"
              style += "width:" + length + "px;"
-             style += "height:1px;"
-             style += "background-color:black;"
+             style += "height:5px;"
+             style += "background-color:rgba(0, 0, 0, .4);"
              style += "position:absolute;"
              style += "transform:rotate(" + angle + "deg);"
              style += "-ms-transform:rotate(" + angle + "deg);"
@@ -250,7 +256,7 @@ var jsPsychEventSegmentation = (function (jspsych) {
              var line = "<div id = 'line' style='" + style + "'></div>"
              console.log(line);
              // setTimeout(()=>{$(line).appendTo('#prompt');},250);
-             setTimeout(()=>{$(line).appendTo('#prompt');},50);
+             setTimeout(()=>{$(line).appendTo('#prompt');},250);
          }
           // add prompt if there is one
           if (trial.prompt==true) {
@@ -300,6 +306,13 @@ var jsPsychEventSegmentation = (function (jspsych) {
                 video_element[stim].src = video_preload_blob[stim];
             }
             video_element[stim].playbackRate = trial.rate;
+            if (trial.mute){
+              video_element[stim].muted = true;
+            }
+            else{
+              video_element[stim].muted = false;
+            }
+
             video_element[stim].onended = onended
             // if video start time is specified, hide the video and set the starting time
             // before showing and playing, so that the video doesn't automatically show the first frame

@@ -63,7 +63,7 @@ var jsPsych = initJsPsych({
 
   var introduction = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: "<p>You will be watching the first 40 minutes of the movie 1917 <strong>without any audio </strong>." +
+    stimulus: "<p>You will be watching the first 40 minutes of the movie 1917." +
                "<br> "+
                "<br> 1917 was released in 2019 - This movie is famous for its single long shot cinematography with no scene cuts." +
                "<br> "+
@@ -79,9 +79,11 @@ var jsPsych = initJsPsych({
                "<br> "+
                "<br> A meaningful unit is usually something that stands out by itself - and doesn't require the rest of the video to understand"+
                "<br> "+
+               "<br> Few relevant examples from this movie are: <strong> walking, salute, colliding, hand gestures, jumping </strong> to name a few"+
+               "<br> "+
                "<br> Tap <strong>SPACE BAR</strong> when in your judgment, one unit ends, and the other begins." +
                "<br> "+
-               "<br> Basically you will be marking off these videos into smallest units that seem natural and meaningful to you. </p>",
+               "<br> Basically you will be marking off these videos into <strong> smallest meaningful units </strong> that seem natural and meaningful to you. </p>",
     choices: ["Next"],
     data:{participant_id:participant_id},
   };
@@ -92,7 +94,7 @@ var jsPsych = initJsPsych({
     type: jsPsychHtmlButtonResponse,
     stimulus: "<p> This experiment should take about 45-50 minutes of your time."+
     "<br>" +
-    "<br> You will receive 1 credits upon completion. </p>",
+    "<br> You will receive 1.5 credits upon completion. </p>",
     choices: ["Okay, let's get started!"],
     data:{participant_id:participant_id},
   };
@@ -118,6 +120,7 @@ var jsPsych = initJsPsych({
     choices: ' ',
     trial_ends_after_video:true,
     prompt: true,
+    mute:false,
     response_ends_trial:false,
     participant_id: participant_id,
   };
