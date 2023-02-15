@@ -80,11 +80,7 @@ var jsPsych = initJsPsych({
     type: jsPsychHtmlButtonResponse,
     stimulus: "<p> This experiment should take about 20-25 minutes of your time. You will receive 0.5 credits upon completion."+
                "<br> "+
-               "<br> You will be watching some clips from the movie 1917 <strong>without any audio </strong>." +
-               "<br> "+
-               "<br> 1917 was released in 2019 - This movie is famous for its single long shot cinematography with no scene cuts." +
-               "<br> "+
-               "<br>This means that visually the movie watching experience should be smooth and continuous without any disruptions.</p>",
+               "<br> You will be watching some clips of actors doing daily chores <strong>without any audio </strong>.</p>",
     choices: ["Next"],
     data:{participant_id:participant_id},
   };
@@ -155,7 +151,7 @@ var demo_trial2 = {
     margin_horizontal: '8px',
     autoplay: true,
     controls: true,
-    rate:2,
+    rate:3,
     response_ends_trial: true,
     response_allowed_while_playing: false,
     mute:true,
