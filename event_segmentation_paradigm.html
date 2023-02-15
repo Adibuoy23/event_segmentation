@@ -145,7 +145,7 @@ var jsPsych = initJsPsych({
 
 var demo_trial2 = {
     type: jsPsychVideoNoAudioButtonResponse,
-    stimulus: [test_stimuli[0].video_one],
+    stimulus: [test_stimuli[1].video_one],
     choices: ['Continue'],
     margin_vertical: '10px',
     margin_horizontal: '8px',
@@ -159,7 +159,7 @@ var demo_trial2 = {
 
   timeline.push({
     timeline: [demo_trial2],
-    timeline_variables: test_stimuli[0]
+    timeline_variables: test_stimuli[1]
               });
 
   var demo_explanation2 = {
