@@ -1,5 +1,7 @@
 var src = 'https://adibuoy23.github.io/event_segmentation/stimuli_with_audio/';
 var stimuli = [
+// Demo build: only the first three entries are active - two practice trials
+// plus a single experimental trial - so the public demo ends after one clip.
 {
 video_one: src+"0msec_2.4.4_C1_trim_clip_2.mp4",
 },
@@ -13,39 +15,39 @@ video_one: src+"0msec_1.1.5_C1_trim_clip_1.mp4",
 {
 video_one: src+"0msec_1.1.5_C1_trim_clip_10.mp4",
 },
-{
-video_one: src+"0msec_3.1.10_C1_trim_clip_0.mp4",
-},
-{
-video_one: src+"0msec_3.1.10_C1_trim_clip_1.mp4",
-},
-{
-video_one: src+"0msec_3.1.10_C1_trim_clip_3.mp4",
-},
-{
-video_one: src+"0msec_3.1.10_C1_trim_clip_4.mp4",
-},
-{
-video_one: src+"0msec_3.1.10_C1_trim_clip_7.mp4",
-},
-{
-video_one: src+"0msec_3.3.7_C2_trim_clip_8.mp4",
-},
-{
-video_one: src+"0msec_3.4.2_C1_trim_clip_2.mp4",
-},
-{
-video_one: src+"0msec_3.4.2_C1_trim_clip_4.mp4",
-},
-{
-video_one: src+"0msec_4.1.2_C2_trim_clip_2.mp4",
-},
-{
-video_one: src+"4.1.2_C2_trim_clip_7.mp4",
-},
-{
-video_one: src+"4.3.3_kinect_trim_clip_3.mp4",
-},
+// {
+// video_one: src+"0msec_3.1.10_C1_trim_clip_0.mp4",
+// },
+// {
+// video_one: src+"0msec_3.1.10_C1_trim_clip_1.mp4",
+// },
+// {
+// video_one: src+"0msec_3.1.10_C1_trim_clip_3.mp4",
+// },
+// {
+// video_one: src+"0msec_3.1.10_C1_trim_clip_4.mp4",
+// },
+// {
+// video_one: src+"0msec_3.1.10_C1_trim_clip_7.mp4",
+// },
+// {
+// video_one: src+"0msec_3.3.7_C2_trim_clip_8.mp4",
+// },
+// {
+// video_one: src+"0msec_3.4.2_C1_trim_clip_2.mp4",
+// },
+// {
+// video_one: src+"0msec_3.4.2_C1_trim_clip_4.mp4",
+// },
+// {
+// video_one: src+"0msec_4.1.2_C2_trim_clip_2.mp4",
+// },
+// {
+// video_one: src+"4.1.2_C2_trim_clip_7.mp4",
+// },
+// {
+// video_one: src+"4.3.3_kinect_trim_clip_3.mp4",
+// },
 //{
 //video_one: src+"0msec_clip_14_1917.mp4",
 //},
