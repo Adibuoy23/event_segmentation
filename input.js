@@ -3,9 +3,10 @@ var stimuli = [
 {
 video_one: src+"0msec_2.4.4_C1_trim_clip_2.mp4",
 },
-{
-video_one: src+"demo_explanation.mp4",
-},
+// demo_explanation.mp4 is not in stimuli_with_audio, so this trial 404s.
+// {
+// video_one: src+"demo_explanation.mp4",
+// },
 {
 video_one: src+"0msec_1.1.5_C1_trim_clip_1.mp4",
 },
