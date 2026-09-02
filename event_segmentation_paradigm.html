@@ -1,57 +1,91 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-  <script src="./jspsych/dist/jspsych.js"></script>
-  <script src="./plugin-html-button-response.js"></script>
-  <script src="./jspsych/dist/plugin-html-keyboard-response.js"></script>
-  <script src="./jspsych/dist/plugin-video-keyboard-response.js"></script>
-  <script src="./plugin-event-segmentation.js"></script>
-  <script src="./plugin-video-minus-audio-button-response.js"></script>
-  <script src="./jspsych/dist/plugin-preload.js"></script>
-  <script src="./jspsych/dist/plugin-fullscreen.js"></script>
-  <script src="./plugin-likert-survey.js"></script>
-  <script src="./plugin-text-survey.js"></script>
-  <script src="./input.js"></script>
-  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
-  <link rel="stylesheet" href="./jspsych/dist/jspsych.css">
-</head>
-
-<body>
-</body>
-
-<script>
-var jsPsych = initJsPsych({
-   override_safe_mode:true,
-    on_finish: function(data){
-    window.location.assign("https://ucdavis.sona-systems.com/webstudy_credit.aspx?experiment_id=2814&credit_token=ec0ffa50d82946bbb1b0f84d7f8db001&survey_code="+sona_id);
-    document.body.style.cursor = 'default';
-  }
-  });
+  <head>
+    <title>project_title</title>
+    <script src="./jspsych/dist/jspsych.js "></script>
+    <script src="./jspsych/dist/plugin-fullscreen.js"></script>
+    <script src="./jspsych/dist/plugin-preload.js"></script>
+    <script src="./jspsych/dist/plugin-html-keyboard-response.js"></script>
+    <script src="./jspsych/dist/plugin-initialize-microphone.js"></script>
+    <script src="./plugin-video-minus-audio-button-response.js"></script>
+    <script src="./jspsych/dist/plugin-instructions.js"></script>
+    <script src="./plugin-likert-survey.js"></script>
+    <script src="./plugin-text-survey.js"></script>
+    <script src="./jspsych/dist/plugin-survey.js"></script>
+    <script src="./jspsych/dist/plugin-external-html.js"></script>
+    <script src="./plugin-event-segmentation.js"></script>
+    <script src="./plugin-html-button-response.js"></script>
+    <script src="./jquery.min.js"></script>
+    <script src="./input.js"></script>
+    <link href="./jspsych/dist/jspsych.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="./story_board.css">
+    <link rel="stylesheet" href="./story_board_heading.css">
+  </head>
+  <body></body>
+  <script>
+    /* initialize jsPsych */
+    var jsPsych = initJsPsych({
+      on_finish: function () {
+      var file_name = 'sub-' + participant_id + '_session-' + sessionid + studyid + '.csv';
+      jsPsych.data.get().localSave('csv',file_name);
+      document.body.style.cursor = 'default';
+    }});
 
   /* create timeline */
-  var timeline = [];
-  let sona_id = jsPsych.data.urlVariables()['sona_id']
-  var participant_id;
-  if (sona_id){
-    participant_id = sona_id
-  } else{
-    participant_id = 0000
-  }
+    var timeline = [];
+    var participant_id=0;
+    var sessionid=0;
+    var studyid='_realtime_eb'
+
+    // /* create the consent form */
+    // // sample function that might be used to check if a participant has given
+    // // consent to participate.
+    // var check_consent = function(elem) {
+    //     if (document.getElementById('consent_checkbox').checked) {
+    //         return true;
+    //     }
+    //     else {
+    //         alert("If you wish to participate, you must check the box next to the statement 'I agree to participate in this study.'");
+    //         return false;
+    //     }
+    //     return false;
+    // };
+
+    // var consent_page = {
+    //   type:jsPsychExternalHtml,
+    //   url:'consent.html',
+    //   cont_btn: "start",
+    //   check_fn: check_consent
+    // }
+    /* create subjectID */
+    var subjectID_page = {
+    type: jsPsychTextSurvey,
+    questions: [
+        {prompt: 'Enter subject ID', columns: 50, required: true, name: 'subject_id'},
+        {prompt: 'Enter Session Num', columns:50, required:true, name: 'session_id'}
+    ],
+    on_finish:function(data){
+        console.log(data.response);
+    let userResponses = data.response;
+    participant_id = userResponses.subject_id.padStart(3,0);
+    sessionid = userResponses.session_id.padStart(2,0);
+    jsPsych.data.addProperties({participant_id: userResponses.subject_id.padStart(3,0)});
+    jsPsych.data.addProperties({sessionid: userResponses.session_id.padStart(2,0)})
+    }
+    };
+  timeline.push(subjectID_page);
 
   var test_stimuli = stimuli.slice(0,2);
   stimuli = stimuli.slice(2,stimuli.length);
 
-  var test_videos = [
-    test_stimuli.map(a => a.video_one),
-  ]
-
+ var test_videos = [
+   test_stimuli.map(a => a.video_one),
+ ]
   var videos = [
     stimuli.map(a => a.video_one),
   ]
-
-  /* preload images */
-  var preload_demo = {
+/* preload images */
+var preload_demo = {
     type: jsPsychPreload,
     video: test_videos,
     data:{participant_id:participant_id},
@@ -67,52 +101,32 @@ var jsPsych = initJsPsych({
   timeline.push(fullscreen_start);
 
 
-  var start = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: '<h3>Welcome to the experiment!</h3><p>Your goal in this experiment is to <b>segment videos into meaningful units.</b></p>',
-    choices: ['Next'],
-    data:{participant_id:participant_id},
-  };
+    var introduction = {
+    type: jsPsychInstructions,
+    pages: [
+    "Welcome to the experiment! Your goal in this experiment is to <b>segment videos into meaningful units.<br><br>",
+    "Please read all instructions carefully. This experiment should take about 50 mins to 1 hour of your time.<br><br>",
+    "You will be watching some clips from the first episode of <strong>Sherlock BBC</strong> series.<br><br>" +
+    "Each clip is approximately 3 min long. There are about 19 clips in total, including 2 practice clips. <br><br><br>",
+    "A WARNING: Sherlock BBC series is a mystery crime drama. Some of the clips may contain violence or discussions of violence.",
+    "We would like you to mark off the activity in these movies into <strong>SMALLEST </strong> units that seem natural and meaningful to you. <br><br>"+
+    "Tap <strong>SPACE BAR</strong> to mark off a boundary between two <strong>SMALL</strong> units of activity.<br><br>"+
+    "A green bar will appear at the bottom of the screen when you press the button.<br><br>", 
+    "Please be careful to press the button as close to the boundary between two units as possible.<br><br>"+
+    "Do not press a button in the middle of a unit.<br><br>",
+    "There are no right or wrong ways to identify these units. <br><br>",
+    "Just be sure that you press the button when you believe one <strong>SMALL</strong> natural and meaningful unit of activity ends and another unit begins.<br><br>",
+    "Let's do a demo trial to get you acquainted with the paradigm.<br><br>",
+  ],
+  data:{participant_id:participant_id, study_id: studyid, session_id: sessionid},
+  show_clickable_nav: true,
+  key_forward: "j",
+  key_backward: "f",
+  }
 
-  timeline.push(start);
-
-  var introduction = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: "<p> This experiment should take about 20-25 minutes of your time. You will receive 0.5 credits upon completion."+
-               "<br> "+
-               "<br> You will be watching some clips of actors doing daily chores <strong>without any audio </strong>.</p>",
-    choices: ["Next"],
-    data:{participant_id:participant_id},
-  };
   timeline.push(introduction);
 
-  var introduction2 = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: "<p>Your job is to segment the video into <strong>small meaningful units </strong>" +
-               "<br> "+
-               "<br> A meaningful unit is usually something that stands out by itself - and doesn't require the rest of the video to understand"+
-               "<br> "+
-               "<br> Tap <strong>SPACE BAR</strong> when in your judgment, one unit ends, and the other begins.</p>",
-    choices: ["Next"],
-    data:{participant_id:participant_id},
-  };
-  timeline.push(introduction2);
-
-
-  var introduction4 = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: "<p> Remember there is <strong> no correct </strong> answer!"+
-    "<br>" +
-    "<br> You should just mark these videos into smallest units that seem natural and meaningful to you."+
-    "<br>" +
-    "<br> Let's do a demo trial to get you acquainted with the paradigm.</p>",
-    choices: ["Okay, let's get started!"],
-    data:{participant_id:participant_id},
-  };
-  timeline.push(introduction4);
-
-
-  var demo_trial1 = {
+  var demo = {
     type: jsPsychEventSegmentation,
     response_allowed_while_playing:true,
     width:1000,
@@ -120,69 +134,125 @@ var jsPsych = initJsPsych({
     choices: ' ',
     trial_ends_after_video:true,
     prompt: true,
-    mute:true,
+    mute:false,
+    controls:true,
     response_ends_trial:false,
     participant_id: participant_id,
+    on_finish: function(){
+      data_length = JSON.parse(jsPsych.data.get().filter({'trial_type':'event-segmentation-video-response'}).trials.pop().rt).length;
+    }
+  };
+
+  var demo1 = {
+    type: jsPsychEventSegmentation,
+    response_allowed_while_playing:true,
+    width:1000,
+    stimulus:[test_stimuli[1].video_one],
+    choices: ' ',
+    trial_ends_after_video:true,
+    prompt: true,
+    mute:false,
+    controls:true,
+    response_ends_trial:false,
+    participant_id: participant_id,
+    on_finish: function(){
+      data_length = JSON.parse(jsPsych.data.get().filter({'trial_type':'event-segmentation-video-response'}).trials.pop().rt).length;
+    }
   };
 
   timeline.push({
-    timeline: [demo_trial1],
-    timeline_variables: test_stimuli[0]
+    timeline: [demo],
+    timeline_variables: test_stimuli[0],
               });
+              
+
+  var demo_feedback = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p> Usually people tend to press the button more number of times than you did. "+
+    "<br>"+
+    "<br>"+
+    "As a reminder, press the <strong>SPACE BAR</strong> to mark off a boundary between two <strong>SMALL</strong> units of activity"+
+    "<br>"+
+    "<br>"+
+    "Let's try again!</p>",
+    choices: ["Continue"],
+    data:{participant_id:participant_id, study_id: studyid, session_id: sessionid},
+    on_start: function(){
+      data_length = JSON.parse(jsPsych.data.get().filter({'trial_type':'event-segmentation-video-response'}).trials.pop().rt).length;
+    },
+  };
+
+  var demo_explanation1 = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "<p> Great! The clip you saw was from a shortfilm called The Paperman. Now, Let's try one more trial."+ 
+    "<br>"+
+    "<br>"+
+    "This time, let's watch a clip from Sherlock BBC series: S1 E2.</p>",
+    choices: ["Continue"],
+    data:{participant_id:participant_id, study_id: studyid, session_id: sessionid},
+  };
 
   var demo_explanation = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: "<p align=left> Notice how many different events were there."+
-    "<br>" +
-    "<br> In here, the actor was <ul> <li> brushing their teeth - this act involved brushing, spitting into the sink, washing their mouth, air drying the brush and putting it back in its place, wiping their mouth <li> cleansing using mouth wash - this involved picking up the mouthwash from the counter, gargling, closing the bottle and putting it back, setting a timer  </ul>."+
-    "<br>" +
-    "Let us try and segment the story into meaningful units keeping this detail in mind <br></p>",
-    choices: ["Let us watch a demo!"],
-    data:{participant_id:participant_id},
-  };
-
-  timeline.push(demo_explanation);
-
-var demo_trial2 = {
-    type: jsPsychVideoNoAudioButtonResponse,
-    stimulus: [test_stimuli[1].video_one],
-    choices: ['Continue'],
-    margin_vertical: '10px',
-    margin_horizontal: '8px',
-    autoplay: true,
-    controls: true,
-    rate:2,
-    response_ends_trial: true,
-    response_allowed_while_playing: false,
-    mute:true,
-  };
-
-  timeline.push({
-    timeline: [demo_trial2],
-    timeline_variables: test_stimuli[1]
-              });
-
-  var demo_explanation2 = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: "<p> Hopefully this demo helped you understand what we mean by small meaningful units"+
+    stimulus: "<p> Great! Hopefully you got an idea of what a meaningful unit is. Now let's try and idenfity the same for clips from episode 1 of the Sherlock BBC series. Remember, there is no correct answer for what a meaninful unit is!"+
     "<br> "+
-    "<br> Remember, there is no correct answer for what a meaninful unit is!"+
-    "<br> "+
+    "<br>" +
     "<br> We just want to know if there are certain segments of the video that you think are natural and meaningful ."+
     "<br> "+
+    "<br>" +
     "<br> Get ready now! Let's segment some more video clips. </p>",
     choices: ["Let's get started"],
-    data:{participant_id:participant_id},
+    data:{participant_id:participant_id, study_id: studyid, session_id: sessionid},
   };
 
-  timeline.push(demo_explanation2);
+   var revisit_demo = {
+    timeline : [demo_feedback, demo],
+    data:{participant_id:participant_id},
+    conditional_function: function(){
+      //get the data from the previous trial
+      // and check which button was pressed
+      if (data_length <=15){
+        return true;
+      } else {
+        return false;
+      }
+    },
+  }
+  
+
+  
+  var revisit_demo1 = {
+    timeline : [demo_feedback, demo1],
+    data:{participant_id:participant_id},
+    conditional_function: function(){
+      //get the data from the previous trial
+      // and check which button was pressed
+      if (data_length <=15){
+        return true;
+      } else {
+        return false;
+      }
+    },
+  }
+  
+timeline.push({
+    timeline: [revisit_demo, revisit_demo, revisit_demo, demo_explanation1],
+  });
+  
+timeline.push({
+  timeline: [demo1],
+  timeline_variables: test_stimuli[1],
+            });
+timeline.push({
+    timeline: [revisit_demo1, revisit_demo1, revisit_demo1, demo_explanation],
+  });
 
   /* preload images */
   var preload = {
     type: jsPsychPreload,
     video: videos,
     message: "Preloading the videos. This might take a while. Please bear with me :)",
-    data:{participant_id:participant_id},
+    data:{participant_id:participant_id, study_id: studyid, session_id: sessionid},
   };
   timeline.push(preload);
 
@@ -196,14 +266,30 @@ var demo_trial2 = {
     choices: ' ',
     trial_ends_after_video:true,
     prompt: true,
-    mute:true,
+    mute:false,
     response_ends_trial:false,
     participant_id: participant_id,
   };
+  
+  var scale = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
 
+  var segmentation_likert_trial = {
+      type: jsPsychLikertSurvey,
+      questions: [
+        {prompt: "Do you think you did a good job of identifying these meaningful units?", name: 'Good segmentation', labels: scale, required: true},
+      ],
+      data:{participant_id:participant_id, study_id: studyid, session_id: sessionid},
+  };
+  
+  var continue_forward = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: "Move to the next clip?",
+    choices: ["Continue"],
+    data:{participant_id:participant_id, study_id: studyid, session_id: sessionid},
+  };
 
   timeline.push({
-    timeline: [trial],
+    timeline: [trial, segmentation_likert_trial, continue_forward],
     timeline_variables: stimuli
               });
 
@@ -213,11 +299,11 @@ var demo_trial2 = {
     stimulus: "<p>THE END.<br>" +
     "Thank you for participating. The experiment is done. <strong> Do not close yet. </strong>"+
     "<br>"+
-    "<br> Please answer a few questions before exiting. Following this, you will be <strong> redirected to the SONA page </strong> to get your credits."+
+    "<br> Please answer a few questions before exiting. Following this, you will be <strong> redirected to the prolific page </strong>."+
     "<br>"+
-    "<br> If you have any questions, please reach out to saupadhy@ucdavis.edu.</p>",
+    "<br> If you have any questions, please reach out to shanmukha@wustl.edu.</p>",
     choices: ["Got it"],
-    data:{participant_id:participant_id},
+    data:{participant_id:participant_id, study_id: studyid, session_id: sessionid},
   }
   timeline.push(end_note);
 
@@ -241,13 +327,50 @@ var demo_trial2 = {
     ],
     data:{participant_id:participant_id},
   };
+  
+  var debrief = {type: jsPsychHtmlButtonResponse,
+    stimulus: "<b>What are we trying to learn in this research?<b>"+
+      "<br>" +
+      "<p>This is an exploratory study investigating if there are “meaningful moments” when viewing naturalistic videos, and how they are represented and remembered. A side research question is to investigate how similar/dissimilar such moments are to event boundaries. Event boundaries are naturally occuring breaks between two meaningful units of our comprehension. They have been shown to play a crucial role in how we represent and remember our daily life experiences. The stimuli used in this study are also being used in other studies posted online. </p>"+
+      "<br>"+
+      "<br>"+
+      "<b>Why is this important to scientists or the general public?<b>"+
+      "<br>"+
+      "<p>Using complex, naturalistic stimuli such as movies has gained popularity among researchers in recent years. However, due to their complexity, it can be challenging to quantify subjective values such as “importance.” Such values are also highly relevant to behavioral measures, such as recall probability, and therefore developing a method to measure them would be very beneficial in research that uses movies. This experiment attempts to validate the utility of this paradigm for quantifying subjective values that fluctuate across a movie.  </p>"+
+      "<br>"+
+      "<b>What are our hypothesis and predictions?<b>"+
+      "<br>"+
+      "<br>"+
+      "<p>We hypothesize that the identified key moments will be frequently recalled when participants recount the movie after viewing. We also hypothesize that the key moments are the most essential for understanding the story and updating evaluations of the main characters in the movie. In other words, these key moments convey more information than other moments/events in the movie. </p>"+
+      "<br>"+
+      "<br>"+
+      "<b>Where can I learn more?<b>"+
+      "<br>"+
+      "<br>"+
+      "<p>Lee, H., & Chen, J. (2022). Predicting memory from the network structure of naturalistic events. Nature Communications, 13(1), Article 1. https://doi.org/10.1038/s41467-022-31965-2.</p>"+
+      "<br>"+
+      "<p>Zacks, J. M., & Swallow, K. M. (2007). Event segmentation. Current directions in psychological science, 16(2), 80-84</p>"+
+      "<br>"+
+      "<p>Zacks, J. M., & Tversky, B. (2001). Event structure in perception and conception. Psychological Bulletin, 127(1), 3–21.</p>"+
+      "<br>"+
+      "<p>Zacks, J. M., Kurby, C. A., Eisenberg, M. L., & Haroutunian, N. (2011). Prediction Error Associated with the Perceptual Segmentation of Naturalistic Events. Journal of Cognitive Neuroscience, 23(12), 4057–4066. https://doi.org/10.1162/jocn_a_00078</p>"+
+      "<br>"+
+      "<p>Song, H., Finn, E. S., & Rosenberg, M. D. (2021). Neural signatures of attentional engagement during narratives and its consequences for event memory. Proceedings of the National Academy of Sciences, 118(33), e2021905118. https://doi.org/10.1073/pnas.2021905118</p>"+
+      "<br>"+
+      "<br>"+
+      "<b>What if I have questions later?<b>"+
+      "<br>"+
+      "<br>"+  
+      "<p>Please contact Aditya Upadhyayula (shanmukha@wustl.edu) of the Complex Memory Lab (PI: Zachariah M. Reagh) and the Dynamic Cognition Lab (P: Jeffrey M. Zacks)</p>",
+    choices: ["Continue"],
+    data:{participant_id:participant_id},}
+  timeline.push(debrief);
 
-  timeline.push(survey_page);
 
   var fullscreen_trial_exit = {
     type: jsPsychFullscreen,
     fullscreen_mode: false,
-    data:{participant_id:participant_id},
+    data:{participant_id:participant_id, study_id: studyid, session_id: sessionid},
   };
 
   timeline.push(fullscreen_trial_exit);
@@ -257,6 +380,6 @@ var demo_trial2 = {
   } else {
     document.body.innerHTML = '<div style="text-align:center; margin-top:50%; transform:translate(0,-50%);">You must be online to view the demo.</div>';
   }
-</script>
 
+  </script>
 </html>

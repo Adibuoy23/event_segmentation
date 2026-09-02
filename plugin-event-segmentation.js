@@ -269,7 +269,7 @@ var jsPsychEventSegmentation = (function (jspsych) {
 
               // drawnode(x1, y);
               // drawnode(x2, y);
-              drawline(x1, y, x2, y);
+              //drawline(x1, y, x2, y);
 
 
           }
@@ -278,6 +278,9 @@ var jsPsychEventSegmentation = (function (jspsych) {
 
           // Create the change time point and response time variables
           var rt;
+          var pause_time=0;
+          var paused = 0;
+          var rt_corrected;   
 
           var video_0 = document.querySelector('#video_0');
 
@@ -363,6 +366,35 @@ var jsPsychEventSegmentation = (function (jspsych) {
                 });
             }
           }
+        // pause the video when the participant switches to another tab, and resume when they return
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) {
+                for(let stim = 0; stim < trial.stimulus.length; stim++){
+                  video_element[stim].pause();
+                  // note the time that the video is paused
+                    pause_time = video_element[stim].currentTime;
+                  // also pause the jsPsych plugin
+                    this.jsPsych.pauseExperiment();  
+                    paused = 1;
+                }
+            
+
+            }
+            else {
+                for(let stim = 0; stim < trial.stimulus.length; stim++){
+                    video_element[stim].play();
+                    // note the time that the video is resumed
+                    var resume_time = video_element[stim].currentTime;
+                    // calculate the duration that the video was paused
+                    var pause_duration = resume_time - pause_time;
+                    // seek the video to the time it would have been if it hadn't been paused
+                    video_element[stim].currentTime = video_element[stim].currentTime - pause_duration;
+                    // also resume the jsPsych plugin
+                    this.jsPsych.resumeExperiment();
+                }
+            }
+        });
+
 
 
           // store response
@@ -410,15 +442,46 @@ var jsPsychEventSegmentation = (function (jspsych) {
               }
               // record all the responses
               console.log(info)
-              response.rt.push(info.rt);
+              // store the rt response after accounting for the time the video was paused
+              if (paused==1){
+                rt_corrected = info.rt - pause_time;
+                paused = 0;
+              }
+                else{
+                    rt_corrected = info.rt;
+                }
+              response.rt.push(rt_corrected);
               response.key.push(info.key);
               response.stim_in_trial.push(stim_in_trial);
-              var temp = x2 * (info.rt/60000);
+              // convert trial_duration to int
+              console.log(trial.trial_duration);
+              var temp = x2 * (info.rt/parseFloat(trial.trial_duration));
               console.log(temp);
-              drawnode(temp, y);
-              if (trial.response_ends_trial) {
-                  end_trial();
-              }
+              //drawnode(temp, y);
+              // Create a new div element
+                var rect = document.createElement("div");
+
+                // Style the div as a green rectangle
+                rect.style.width = "100px";
+                rect.style.height = "100px";
+                rect.style.background = "green";
+                rect.style.position = "fixed";
+                rect.style.bottom = "0";
+                rect.style.left = "50%";
+                rect.style.transform = "translateX(-50%)";
+
+                // Append the rectangle to the body
+                document.body.appendChild(rect);
+
+                // Remove the rectangle after 100 ms
+                setTimeout(function() {
+                    document.body.removeChild(rect);
+                }, 100);
+              // display a green rectangle in the bottom middle of the screen for 100 ms
+
+            //   if (trial.response_ends_trial) {
+            //       end_trial();
+            //   }
           };
           // start the response listener
           if (trial.choices != "NO_KEYS" && trial.response_allowed_while_playing) {
